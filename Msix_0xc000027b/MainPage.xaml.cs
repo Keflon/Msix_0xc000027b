@@ -19,35 +19,59 @@ namespace Msix_0xc000027b
 
             InitializeComponent();
 
-            _portAdapter = new SerialPortAdapter();
-
+            // Dispatch incoming data onto the UI thread.
+            _portAdapter = new SerialPortAdapter(invoker => this.Dispatcher.Dispatch(invoker));
             _portAdapter.PortDataReceived += _portAdapter_PortDataReceived;
         }
 
-        // DSAFE: We're on the UI thread.
+        // SAFE: We're on the UI thread.
         private void _portAdapter_PortDataReceived(object? sender, PortDataReceivedEventArgs e)
         {
             foreach (var ch in e.Data)
             {
-                if (ch == 0x10)
+                if (ch == 13)
                     IncomingSerialData.Add("");
+                else if(ch==10)
+                {
 
-                IncomingSerialData[IncomingSerialData.Count - 1] += (char)ch;
-
-                if (IncomingSerialData.Count > 100)
-                    IncomingSerialData.Add("");
+                }
+                else
+                {
+                    IncomingSerialData[IncomingSerialData.Count - 1] += (char)ch;
+                }
             }
         }
 
         private void theButton_Clicked(object sender, EventArgs e)
         {
+            string comPortName = theComPort.Text;
+            int baudRate;
+            bool respectCts = theRespectCts.IsChecked;
+            Parity parity;
+
+            if (int.TryParse(theBaudRate.Text, out baudRate) == false)
+            {
+                theBaudRate.Text = "Bad value";
+                return;
+            }
+            if (int.TryParse(theBaudRate.Text, out baudRate) == false)
+            {
+                theBaudRate.Text = "Bad value";
+                return;
+            }
+            if (Enum.TryParse(theParity.Text, out parity) == false)
+            {
+                theParity.Text = "Bad value";
+                return;
+            }
+
             if (_portAdapter.IsConnected)
             {
                 _portAdapter.Detach();
             }
 
             IncomingSerialData.Clear();
-            if (_portAdapter.TryAttachTo(theEntry.Text) == false)
+            if (_portAdapter.TryAttachTo(comPortName, baudRate, parity, respectCts) == false)
             {
                 IncomingSerialData.Add("Fail");
             }
@@ -55,12 +79,16 @@ namespace Msix_0xc000027b
             {
                 IncomingSerialData.Clear();
                 IncomingSerialData.Add("> ");
-                _ = _portAdapter.WriteAsync(Encoding.UTF8.GetBytes(".DID"));
             }
+        }
 
+        private void Button_Clicked(object sender, EventArgs e)
+        {
+            if (_portAdapter.IsConnected)
+            {
+                _ = _portAdapter.WriteAsync(Encoding.UTF8.GetBytes(theMessageToSend.Text));
 
-            SemanticScreenReader.Announce("Click");
+            }
         }
     }
-
 }

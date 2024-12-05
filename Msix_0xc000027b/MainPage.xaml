@@ -5,40 +5,50 @@
              x:Name="Self"
              BindingContext="{x:Reference Self}">
 
-    <VerticalStackLayout
+    <Grid ColumnDefinitions="*,*">
+        <VerticalStackLayout Grid.Column="0"
             Padding="20,0"
             Spacing="5">
-        <Image
+            <Image
                 Source="dotnet_bot.png"
                 HeightRequest="185"
                 Aspect="AspectFit"
                 SemanticProperties.Description="dot net bot in a hovercraft number nine" />
 
-        <Label
-                Text="Hello, World!"
+            <Label
+                Text="Hello, SerialPort!"
                 Style="{StaticResource Headline}"
                 SemanticProperties.HeadingLevel="Level1" />
 
-        <Label
-                Text="Welcome to &#10;.NET Multi-platform App UI"
+            <Label
+                Text="Welcome to &#10;.NET MSIX SerialPort Test!"
                 Style="{StaticResource SubHeadline}"
                 SemanticProperties.HeadingLevel="Level2"
                 SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
 
-        <Label Text="Please enter COM port name ..."/>
-        <Label Text="{Binding Test}"/>
+            <Label Text="Please enter COM port name ..."/>
+            <Entry x:Name="theComPort" Placeholder="COM port"/>
+            <Label Text="Please enter baud rate ..."/>
+            <Entry x:Name="theBaudRate" Placeholder="COM port" Text="115200"/>
+            <Label Text="Parity? (None = 0,Odd = 1,Even = 2,Mark = 3,Space = 4) ..."/>
+            <Entry x:Name="theParity"  Placeholder="None = 0,Odd = 1,Even = 2,Mark = 3,Space = 4" Text="0"/>
+            <Label Text="Respect CTS? ..."/>
+            <CheckBox x:Name="theRespectCts" IsChecked="False"/>
 
-        <Entry x:Name="theEntry" Placeholder="COM port"/>
-
-
-        <Button
+            <Button
                 x:Name="theButton"
                 Text="Connect" 
-                SemanticProperties.Hint="Counts the number of times you click"
                 Clicked="theButton_Clicked"
                 HorizontalOptions="Fill" />
 
-        <CollectionView VerticalOptions="Fill"
+            <Label Text="Message to send ..."/>
+            <Entry x:Name="theMessageToSend" Placeholder="?"/>
+
+            <Button Text="Send" Clicked="Button_Clicked"/>
+
+        </VerticalStackLayout>
+        
+        <CollectionView x:Name="theCollectionView" Grid.Column="1" ItemsUpdatingScrollMode="KeepLastItemInView"
             ItemsSource="{Binding IncomingSerialData}" 
             BackgroundColor="AliceBlue"
             >
@@ -48,6 +58,6 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-    </VerticalStackLayout>
+    </Grid>
 
 </ContentPage>
